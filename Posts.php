@@ -12,7 +12,6 @@ class Posts {
         $slug = preg_replace('/-+/', '-', $slug);
         $slug = trim($slug, '-');
         
-        // Check for existing slugs
         $originalSlug = $slug;
         $counter = 1;
         
@@ -20,7 +19,6 @@ class Posts {
             $whereClause = "slug = ?";
             $params = [$slug];
             
-            // Don't check current post when updating
             if ($id) {
                 $whereClause .= " AND id != ?";
                 $params[] = $id;
@@ -68,15 +66,14 @@ class Posts {
         
         $posts = $this->db->fetchAll($sql, $params);
         
-        // Get total count for pagination
         $countSql = "
             SELECT COUNT(*) as total 
             FROM posts p 
             JOIN users u ON p.author_id = u.id 
             WHERE {$whereClause}
         ";
-        array_pop($params); // Remove OFFSET
-        array_pop($params); // Remove LIMIT
+        array_pop($params); 
+        array_pop($params); 
         
         $total = $this->db->fetchOne($countSql, $params)['total'];
         
@@ -124,55 +121,94 @@ class Posts {
         return $this->db->insert('posts', $postData);
     }
     
-    public function update($id, $data) {
-        $updateData = [];
-        
-        if (isset($data['title'])) {
-            $updateData['title'] = $data['title'];
-            $updateData['slug'] = $this->generateSlug($data['title'], $id);
-        }
-        
-        if (isset($data['body'])) {
-            $updateData['body'] = $data['body'];
-        }
-        
-        if (isset($data['cover_media_url'])) {
-            $updateData['cover_media_url'] = $data['cover_media_url'];
-        }
-        
-        if (isset($data['media_type'])) {
-            $updateData['media_type'] = $data['media_type'];
-        }
-        
-        if (isset($data['media_attribution'])) {
-            $updateData['media_attribution'] = $data['media_attribution'];
-        }
-        
-        if (empty($updateData)) {
-            return false;
-        }
-        
-        $updateData['updated_at'] = date('Y-m-d H:i:s');
-        
-        return $this->db->update('posts', $updateData, 'id = ?', [$id]);
+
+
+public function update($id, $data) {
+    $fields = [];
+    $params = [];
+    
+    if (isset($data['title'])) {
+        $fields[] = 'title = :title';
+        $params[':title'] = $data['title'];
     }
     
-    public function softDelete($id) {
-        return $this->db->update(
-            'posts', 
-            ['status' => 'deleted', 'updated_at' => date('Y-m-d H:i:s')], 
-            'id = ?', 
-            [$id]
-        );
+    if (isset($data['body'])) {
+        $fields[] = 'body = :body';
+        $params[':body'] = $data['body'];
     }
     
+    if (isset($data['cover_media_url'])) {
+        $fields[] = 'cover_media_url = :cover_media_url';
+        $params[':cover_media_url'] = $data['cover_media_url'];
+    }
+    
+    if (isset($data['media_type'])) {
+        $fields[] = 'media_type = :media_type';
+        $params[':media_type'] = $data['media_type'];
+    }
+    
+    if (isset($data['media_attribution'])) {
+        $fields[] = 'media_attribution = :media_attribution';
+        $params[':media_attribution'] = $data['media_attribution'];
+    }
+    
+    $fields[] = 'updated_at = NOW()';
+    
+    $params[':id'] = $id;
+    
+    if (empty($fields)) {
+        return false; 
+    }
+    
+    $sql = "UPDATE posts SET " . implode(', ', $fields) . " WHERE id = :id";
+    
+    try {
+        $stmt = $this->db->getConnection()->prepare($sql);
+        return $stmt->execute($params);
+    } catch (PDOException $e) {
+        error_log("Update query failed: " . $e->getMessage());
+        error_log("SQL: " . $sql);
+        error_log("Params: " . print_r($params, true));
+        throw new Exception("Query failed: " . $e->getMessage());
+    }
+}
+    
+  public function softDelete($id) {
+    $sql = "UPDATE posts SET status = :status, updated_at = NOW() WHERE id = :id";
+    
+    $params = [
+        ':status' => 'deleted',
+        ':id' => $id
+    ];
+    
+    try {
+        $stmt = $this->db->getConnection()->prepare($sql);
+        return $stmt->execute($params);
+    } catch (PDOException $e) {
+        error_log("SoftDelete query failed: " . $e->getMessage());
+        error_log("SQL: " . $sql);
+        error_log("Params: " . print_r($params, true));
+        throw new Exception("Query failed: " . $e->getMessage());
+    }
+}
     public function canUserEdit($postId, $userId, $userRole) {
-        if ($userRole === 'admin') {
-            return true;
-        }
-        
-        $post = $this->getById($postId);
-        return $post && $post['author_id'] == $userId;
+    if ($userRole === 'admin') {
+        return true;
     }
+    
+    $sql = "SELECT author_id FROM posts WHERE id = :id";
+    $params = [':id' => $postId];
+    
+    try {
+        $stmt = $this->db->getConnection()->prepare($sql);
+        $stmt->execute($params);
+        $post = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $post && $post['author_id'] == $userId;
+    } catch (PDOException $e) {
+        error_log("canUserEdit query failed: " . $e->getMessage());
+        throw new Exception("Query failed: " . $e->getMessage());
+    }
+}
 }
 ?>

@@ -153,16 +153,15 @@
       }
 
       .btn-secondary {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        padding: 8px 16px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.3s ease;
-      }
-
+  background: rgba(112, 226, 226, 0.2);;
+  color: #141414;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
       .btn-secondary:hover {
         background: rgba(255, 255, 255, 0.3);
       }
@@ -342,7 +341,6 @@
         cursor: not-allowed;
       }
 
-      /* Modal Styles */
       .modal {
         display: none;
         position: fixed;
@@ -591,7 +589,6 @@
     </style>
   </head>
   <body>
-    <!-- Login Form -->
     <div id="loginContainer" class="login-container">
       <div class="login-card">
         <h1 class="login-title">Blog Dashboard</h1>
@@ -622,13 +619,12 @@
           "
         >
           <strong>Test Credentials:</strong><br />
-          Admin: admin@blog.com / admin123<br />
-          User: john@example.com / user123
+          Admin: admin@blog.com / password<br />
+          User: john@example.com / password
         </div>
       </div>
     </div>
 
-    <!-- Dashboard -->
     <div id="dashboardContainer" class="container hidden">
       <div class="dashboard">
         <div class="dashboard-header">
@@ -683,7 +679,7 @@
       </div>
     </div>
 
-    <!-- Create/Edit Post Modal -->
+
     <div id="postModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
@@ -705,32 +701,32 @@
                 Add Cover Media (Optional)
               </h4>
 
-              <div class="media-type-selector">
-                <label class="media-type-radio">
-                  <input type="radio" name="mediaType" value="photo" checked />
-                  Images
-                </label>
-                <label class="media-type-radio">
-                  <input type="radio" name="mediaType" value="video" />
-                  Videos
-                </label>
-              </div>
+            <div class="media-type-selector">
+    <label class="media-type-radio">
+      <input type="radio" name="mediaType" value="photo" checked />
+      Images
+    </label>
+    <label class="media-type-radio">
+      <input type="radio" name="mediaType" value="video" />
+      Videos
+    </label>
+  </div>
 
-              <div class="media-search-header">
-                <input
-                  type="text"
-                  id="mediaSearchInput"
-                  class="form-control media-search-input"
-                  placeholder="Search Pixabay for media..."
-                />
-                <button type="button" id="mediaSearchBtn" class="btn-secondary">
-                  Search
-                </button>
-              </div>
+  <div class="media-search-header">
+    <input
+      type="text"
+      id="mediaSearchInput"
+      class="form-control media-search-input"
+      placeholder="Search Pixabay for media..."
+    />
+    <button type="button" id="mediaSearchBtn" class="btn-secondary">
+      Search
+    </button>
+  </div>
 
-              <div id="mediaResults" class="media-results hidden"></div>
-              <div id="mediaPreview" class="media-preview hidden"></div>
-            </div>
+  <div id="mediaResults" class="media-results hidden"></div>
+  <div id="mediaPreview" class="media-preview hidden"></div>
+</div>
 
             <div class="form-group">
               <label for="postBody">Content *</label>
@@ -755,7 +751,6 @@
     </div>
 
     <script>
-      // Global state
       let currentUser = null;
       let currentPosts = [];
       let currentPage = 1;
@@ -763,10 +758,8 @@
       let editingPostId = null;
       let selectedMedia = null;
 
-      // API base URL
       const API_BASE = window.location.origin + "/blogportal/api.php";
 
-      // Authentication
       function getToken() {
         return localStorage.getItem("blog_token");
       }
@@ -784,27 +777,39 @@
         return token ? { Authorization: `Bearer ${token}` } : {};
       }
 
-      // API calls
-      async function apiCall(endpoint, options = {}) {
-        const response = await fetch(`${API_BASE}/${endpoint}`, {
-          headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeaders(),
-            ...options.headers,
-          },
-          ...options,
-        });
+async function apiCall(endpoint, options = {}) {
+  let url;
 
-        const data = await response.json();
+  if (endpoint.includes("?")) {
+    const [base, query] = endpoint.split("?");
+    url = `${API_BASE}?path=${base}&${query}`;
+  } else {
+    url = `${API_BASE}?path=${endpoint}`;
+  }
 
-        if (!response.ok) {
-          throw new Error(data.error || "Request failed");
-        }
+  console.log("🔎 Fetch:", url, options);
 
-        return data;
-      }
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
+      ...options.headers,
+    },
+    ...options,
+  });
 
-      // Login
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error("❌ API Error:", data);
+    throw new Error(data.error || "Request failed");
+  }
+
+  return data;
+}
+
+
+ 
       document
         .getElementById("loginForm")
         .addEventListener("submit", async (e) => {
@@ -815,7 +820,7 @@
           const errorDiv = document.getElementById("loginError");
 
           try {
-            const result = await apiCall("?path=auth/login", {
+            const result = await apiCall("auth/login", {
   method: "POST",
   body: JSON.stringify({ email, password }),
 });
@@ -830,14 +835,13 @@
           }
         });
 
-      // Logout
       document.getElementById("logoutBtn").addEventListener("click", () => {
         removeToken();
         currentUser = null;
         showLogin();
       });
 
-      // Show/hide views
+ 
       function showLogin() {
         document.getElementById("loginContainer").classList.remove("hidden");
         document.getElementById("dashboardContainer").classList.add("hidden");
@@ -856,7 +860,7 @@
         loadPosts();
       }
 
-      // Load posts
+     
       async function loadPosts(page = 1, search = "", status = "active") {
         const loadingDiv = document.getElementById("postsLoading");
         const errorDiv = document.getElementById("postsError");
@@ -945,12 +949,12 @@
 
         let html = "";
 
-        // Previous button
+       
         html += `<button ${
           currentPage === 1 ? "disabled" : ""
         } onclick="changePage(${currentPage - 1})">Previous</button>`;
 
-        // Page numbers
+      
         for (let i = 1; i <= totalPages; i++) {
           if (
             i === currentPage ||
@@ -966,7 +970,7 @@
           }
         }
 
-        // Next button
+
         html += `<button ${
           currentPage === totalPages ? "disabled" : ""
         } onclick="changePage(${currentPage + 1})">Next</button>`;
@@ -982,7 +986,7 @@
         }
       }
 
-      // Search functionality
+     
       document.getElementById("searchBtn").addEventListener("click", () => {
         const search = document.getElementById("searchInput").value;
         const status = document.getElementById("statusFilter").value;
@@ -1001,7 +1005,7 @@
         document.getElementById("searchBtn").click();
       });
 
-      // Post management
+  
       function canEditPost(post) {
         return currentUser.role === "admin" || post.author_id == currentUser.id;
       }
@@ -1052,7 +1056,7 @@
         }
       }
 
-      // Modal management
+    
       document.getElementById("createPostBtn").addEventListener("click", () => {
         editingPostId = null;
         selectedMedia = null;
@@ -1076,46 +1080,79 @@
         document.getElementById("postModal").style.display = "none";
       });
 
-      // Close modal when clicking outside
+     
       window.addEventListener("click", (e) => {
         if (e.target === document.getElementById("postModal")) {
           document.getElementById("postModal").style.display = "none";
         }
       });
 
-      // Media search functionality
-      document
-        .getElementById("mediaSearchBtn")
-        .addEventListener("click", async () => {
-          const query = document
-            .getElementById("mediaSearchInput")
-            .value.trim();
-          if (!query) return;
 
-          const mediaType = document.querySelector(
-            'input[name="mediaType"]:checked'
-          ).value;
-          const resultsDiv = document.getElementById("mediaResults");
+document
+  .getElementById("mediaSearchBtn")
+  .addEventListener("click", async () => {
+    
+    const query = document
+      .getElementById("mediaSearchInput")
+      .value.trim();
+    
+    
+    if (!query) {
+      console.log("Empty query, returning");
+      return;
+    }
 
-          try {
-            resultsDiv.innerHTML =
-              '<div style="text-align: center; padding: 20px;">Searching...</div>';
-            resultsDiv.classList.remove("hidden");
+    const mediaType = document.querySelector(
+      'input[name="mediaType"]:checked'
+    ).value;
+    
 
-            const result = await apiCall(
-              `pixabay/search?q=${encodeURIComponent(query)}&type=${mediaType}`
-            );
+    
+    const resultsDiv = document.getElementById("mediaResults");
 
-            if (result.hits && result.hits.length > 0) {
-              renderMediaResults(result.hits, mediaType);
-            } else {
-              resultsDiv.innerHTML =
-                '<div style="text-align: center; padding: 20px; color: #666;">No results found</div>';
-            }
-          } catch (error) {
-            resultsDiv.innerHTML = `<div style="text-align: center; padding: 20px; color: #c33;">Error: ${error.message}</div>`;
-          }
+    try {
+      console.log("Starting search...");
+      resultsDiv.innerHTML =
+        '<div style="text-align: center; padding: 20px;">Searching...</div>';
+      resultsDiv.classList.remove("hidden");
+
+
+      const token = getToken();
+      if (token) {
+        console.log("Token preview:", token.substring(0, 20) + "...");
+      }
+
+      const endpoint = `pixabay/search?q=${encodeURIComponent(query)}&type=${mediaType}`;
+
+      const result = await apiCall(endpoint);
+      
+      console.log("Result structure:", {
+        hasHits: !!result.hits,
+        hitsLength: result.hits ? result.hits.length : 0,
+        totalHits: result.totalHits || 'unknown',
+        resultKeys: Object.keys(result)
+      });
+
+      if (result.hits && result.hits.length > 0) {
+        console.log("First result sample:", {
+          id: result.hits[0].id,
+          tags: result.hits[0].tags,
+          hasWebformatURL: !!result.hits[0].webformatURL,
+          hasVideos: !!result.hits[0].videos
         });
+        
+        renderMediaResults(result.hits, mediaType);
+      } else {
+        console.log("📭 No results found");
+        resultsDiv.innerHTML =
+          '<div style="text-align: center; padding: 20px; color: #666;">No results found</div>';
+      }
+    } catch (error) {
+      console.error("❌ Error message:", error.message);
+      
+      resultsDiv.innerHTML = `<div style="text-align: center; padding: 20px; color: #c33;">Error: ${error.message}<br><small>Check console for details</small></div>`;
+    }
+  });
 
       function renderMediaResults(hits, mediaType) {
         const resultsDiv = document.getElementById("mediaResults");
@@ -1138,17 +1175,17 @@
           )
           .join("");
 
-        // Store hits for selection
+ 
         window.currentMediaHits = hits;
       }
 
       function selectMedia(index, mediaType) {
-        // Remove previous selection
+      
         document.querySelectorAll(".media-item").forEach((item) => {
           item.classList.remove("selected");
         });
 
-        // Add selection to clicked item
+
         event.target.closest(".media-item").classList.add("selected");
 
         const item = window.currentMediaHits[index];
@@ -1191,7 +1228,7 @@
         });
       }
 
-      // Save post
+  
       document
         .getElementById("savePostBtn")
         .addEventListener("click", async () => {
@@ -1244,7 +1281,7 @@
             successDiv.classList.remove("hidden");
             errorDiv.classList.add("hidden");
 
-            // Reload posts and close modal after a short delay
+            
             setTimeout(() => {
               document.getElementById("postModal").style.display = "none";
               loadPosts(
@@ -1260,7 +1297,7 @@
           }
         });
 
-      // Utility functions
+
       function escapeHtml(text) {
         const div = document.createElement("div");
         div.textContent = text;
@@ -1275,26 +1312,23 @@
         });
       }
 
-      // Initialize app
       function init() {
         const token = getToken();
         if (token) {
-          // Try to verify token is still valid by making a test API call
           apiCall("posts?page=1")
             .then(() => {
-              // Token is valid, decode user info from token (simple version)
               const payload = JSON.parse(atob(token.split(".")[1]));
               currentUser = {
                 id: payload.sub,
                 role: payload.role,
-                email: "Current User", // We don't store email in JWT for this demo
+                email: "Current User", 
               };
 
-              // Try to get user email from a test call
+             
               return apiCall("posts?page=1&per_page=1");
             })
             .then((result) => {
-              // If we have posts, we can get the current user's email from their posts
+             
               const userPost = result.posts.find(
                 (post) => post.author_id == currentUser.id
               );
@@ -1304,7 +1338,7 @@
               showDashboard();
             })
             .catch(() => {
-              // Token invalid or expired
+             
               removeToken();
               showLogin();
             });
@@ -1313,7 +1347,7 @@
         }
       }
 
-      // Start the app
+
       init();
     </script>
   </body>

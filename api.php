@@ -11,7 +11,6 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-// Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
@@ -24,7 +23,6 @@ $method = $_SERVER['REQUEST_METHOD'];
 $path = isset($_GET['path']) ? $_GET['path'] : '';
 $segments = explode('/', trim($path, '/'));
 
-// Remove 'api.php' if it's in the path
 if (in_array('api.php', $segments)) {
     $segments = array_values(array_diff($segments, ['api.php']));
 }
@@ -33,7 +31,6 @@ try {
     switch ($method) {
         case 'POST':
             if ($segments[0] === 'auth' && $segments[1] === 'login') {
-                // Login endpoint
                 $input = json_decode(file_get_contents('php://input'), true);
                 
                 if (!isset($input['email']) || !isset($input['password'])) {
@@ -42,7 +39,10 @@ try {
                     exit;
                 }
                 
+                
                 $user = $userModel->authenticate($input['email'], $input['password']);
+
+                
                 
                 if (!$user) {
                     http_response_code(401);
@@ -63,7 +63,6 @@ try {
                 ]);
                 
             } elseif ($segments[0] === 'posts') {
-                // Create post
                 $currentUser = AuthMiddleware::getCurrentUser();
                 $input = json_decode(file_get_contents('php://input'), true);
                 
@@ -87,7 +86,6 @@ try {
         case 'GET':
             if ($segments[0] === 'posts') {
                 if (isset($segments[1]) && is_numeric($segments[1])) {
-                    // Get single post by ID
                     $post = $postModel->getById($segments[1]);
                     
                     if (!$post) {
@@ -99,12 +97,10 @@ try {
                     echo json_encode($post);
                     
                 } else {
-                    // Get all posts with pagination and search
                     $page = $_GET['page'] ?? 1;
                     $search = $_GET['search'] ?? '';
                     $status = $_GET['status'] ?? 'active';
                     
-                    // Check if user is authenticated for dashboard view
                     if ($status !== 'active') {
                         AuthMiddleware::getCurrentUser();
                     }
@@ -114,11 +110,10 @@ try {
                 }
                 
             } elseif ($segments[0] === 'pixabay' && $segments[1] === 'search') {
-                // Pixabay search proxy
-                AuthMiddleware::getCurrentUser(); // Require authentication
+                AuthMiddleware::getCurrentUser(); 
                 
                 $query = $_GET['q'] ?? '';
-                $type = $_GET['type'] ?? 'photo'; // photo or video
+                $type = $_GET['type'] ?? 'photo'; 
                 
                 if (empty($query)) {
                     http_response_code(400);
@@ -132,7 +127,7 @@ try {
                 }
                 
                 $params = [
-                    'key' => PIXABAY_API_KEY,
+                    'key' => '51948716-48160e10077ec275ad41f3dec',
                     'q' => urlencode($query),
                     'per_page' => 20,
                     'safesearch' => 'true',
@@ -166,7 +161,6 @@ try {
             
         case 'PUT':
             if ($segments[0] === 'posts' && isset($segments[1]) && is_numeric($segments[1])) {
-                // Update post
                 $currentUser = AuthMiddleware::getCurrentUser();
                 $postId = $segments[1];
                 
@@ -194,7 +188,6 @@ try {
             
         case 'DELETE':
             if ($segments[0] === 'posts' && isset($segments[1]) && is_numeric($segments[1])) {
-                // Soft delete post
                 $currentUser = AuthMiddleware::getCurrentUser();
                 $postId = $segments[1];
                 
@@ -223,6 +216,7 @@ try {
             http_response_code(405);
             echo json_encode(['error' => 'Method not allowed']);
             break;
+            
     }
     
 } catch (Exception $e) {

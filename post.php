@@ -22,7 +22,6 @@ if (!$post) {
     exit;
 }
 
-// Escape output for security
 function e($text) {
     return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 }
@@ -89,7 +88,6 @@ function formatDate($date) {
 
             <div class="content">
                 <?php 
-                // Simple formatting - convert line breaks to paragraphs
                 $content = nl2br(e($post['body']));
                 $paragraphs = explode("\n", $post['body']);
                 foreach ($paragraphs as $paragraph) {
@@ -101,7 +99,7 @@ function formatDate($date) {
             </div>
         </article>
 
-        <a href="javascript:history.back()" class="back-link">← Back to Blog</a>
+        <a href="/blogportal/index.html" class="back-link">← Back to Blog</a>
     </div>
 </body>
 </html>
