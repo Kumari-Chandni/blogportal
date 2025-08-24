@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog Management Dashboard</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* Login Form Styles */
+      .login-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .login-card {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        backdrop-filter: blur(10px);
+      }
+
+      .login-title {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #555;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .btn {
+        width: 100%;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .error-message {
+        background: #fee;
+        color: #c33;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #c33;
+      }
+
+      .success-message {
+        background: #efe;
+        color: #363;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #363;
+      }
+
+      /* Dashboard Styles */
+      .dashboard {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .dashboard-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .dashboard-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+
+      .dashboard-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .btn-primary {
+        background: white;
+        color: #667eea;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+      }
+
+      .dashboard-content {
+        padding: 30px;
+      }
+
+      .search-filters {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .search-input {
+        flex: 1;
+        min-width: 200px;
+        padding: 10px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 0.95rem;
+      }
+
+      .filter-select {
+        padding: 10px 16px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background: white;
+      }
+
+      .posts-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .posts-table th {
+        background: #f8f9fa;
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        color: #555;
+        border-bottom: 2px solid #e1e5e9;
+      }
+
+      .posts-table td {
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .posts-table tr:hover {
+        background: #f8f9fa;
+      }
+
+      .post-title {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .post-title:hover {
+        text-decoration: underline;
+      }
+
+      .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+
+      .status-active {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .status-deleted {
+        background: #f8d7da;
+        color: #721c24;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+      }
+
+      .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-edit {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-edit:hover {
+        background: #5a6fd8;
+      }
+
+      .btn-delete {
+        background: #dc3545;
+        color: white;
+      }
+
+      .btn-delete:hover {
+        background: #c82333;
+      }
+
+      .btn-view {
+        background: #28a745;
+        color: white;
+      }
+
+      .btn-view:hover {
+        background: #218838;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 30px;
+      }
+
+      .pagination button {
+        padding: 8px 16px;
+        border: 1px solid #dee2e6;
+        background: white;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+      }
+
+      .pagination button:hover:not(:disabled) {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+      }
+
+      .pagination button.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+      }
+
+      .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-header {
+        padding: 24px 30px;
+        border-bottom: 1px solid #e1e5e9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 16px 16px 0 0;
+      }
+
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .close {
+        color: white;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+
+      .close:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .modal-body {
+        padding: 30px;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .form-row .form-group {
+        flex: 1;
+      }
+
+      .textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      .media-search {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 2px dashed #dee2e6;
+      }
+
+      .media-search-header {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .media-search-input {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .media-type-selector {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .media-type-radio {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .media-results {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .media-item {
+        cursor: pointer;
+        border: 3px solid transparent;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .media-item:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .media-item.selected {
+        border-color: #28a745;
+        transform: scale(1.05);
+      }
+
+      .media-item img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .media-preview {
+        margin-top: 15px;
+        padding: 15px;
+        background: white;
+        border: 1px solid #e1e5e9;
+        border-radius: 8px;
+      }
+
+      .media-preview img,
+      .media-preview video {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 8px;
+      }
+
+      .modal-footer {
+        padding: 20px 30px;
+        border-top: 1px solid #e1e5e9;
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        background: #f8f9fa;
+      }
+
+      .btn-cancel {
+        background: #6c757d;
+        color: white;
+      }
+
+      .btn-cancel:hover {
+        background: #5a6268;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+      }
+
+      .loading::after {
+        content: "";
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #dee2e6;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-left: 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .user-info {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
+        }
+        .dashboard-header {
+          padding: 20px;
+        }
+        .dashboard-content {
+          padding: 20px;
+        }
+        .modal-content {
+          margin: 2% auto;
+          width: 95%;
+        }
+        .posts-table {
+          font-size: 0.9rem;
+        }
+        .posts-table th,
+        .posts-table td {
+          padding: 12px 8px;
+        }
+        .search-filters {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .form-row {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Login Form -->
+    <div id="loginContainer" class="login-container">
+      <div class="login-card">
+        <h1 class="login-title">Blog Dashboard</h1>
+        <div id="loginError" class="error-message hidden"></div>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              required
+            />
+          </div>
+          <button type="submit" class="btn">Login</button>
+        </form>
+        <div
+          style="
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.9rem;
+            color: #666;
+          "
+        >
+          <strong>Test Credentials:</strong><br />
+          Admin: admin@blog.com / admin123<br />
+          User: john@example.com / user123
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboardContainer" class="container hidden">
+      <div class="dashboard">
+        <div class="dashboard-header">
+          <div>
+            <h1 class="dashboard-title">Blog Management</h1>
+            <div class="user-info">
+              Welcome, <span id="userEmail"></span> (<span id="userRole"></span
+              >)
+            </div>
+          </div>
+          <div class="dashboard-actions">
+            <button id="createPostBtn" class="btn-primary">
+              Create New Post
+            </button>
+            <button id="logoutBtn" class="btn-secondary">Logout</button>
+          </div>
+        </div>
+
+        <div class="dashboard-content">
+          <div class="search-filters">
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="Search posts..."
+            />
+            <select id="statusFilter" class="filter-select">
+              <option value="active">Active Posts</option>
+              <option value="deleted">Deleted Posts</option>
+            </select>
+            <button id="searchBtn" class="btn-secondary">Search</button>
+          </div>
+
+          <div id="postsLoading" class="loading hidden">Loading posts...</div>
+          <div id="postsError" class="error-message hidden"></div>
+
+          <table id="postsTable" class="posts-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Created</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="postsTableBody"></tbody>
+          </table>
+
+          <div id="pagination" class="pagination"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create/Edit Post Modal -->
+    <div id="postModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="postModalTitle">Create New Post</h2>
+          <button class="close" id="postModalClose">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="postError" class="error-message hidden"></div>
+          <div id="postSuccess" class="success-message hidden"></div>
+
+          <form id="postForm">
+            <div class="form-group">
+              <label for="postTitle">Title *</label>
+              <input type="text" id="postTitle" class="form-control" required />
+            </div>
+
+            <div class="media-search">
+              <h4 style="margin-bottom: 15px; color: #667eea">
+                Add Cover Media (Optional)
+              </h4>
+
+              <div class="media-type-selector">
+                <label class="media-type-radio">
+                  <input type="radio" name="mediaType" value="photo" checked />
+                  Images
+                </label>
+                <label class="media-type-radio">
+                  <input type="radio" name="mediaType" value="video" />
+                  Videos
+                </label>
+              </div>
+
+              <div class="media-search-header">
+                <input
+                  type="text"
+                  id="mediaSearchInput"
+                  class="form-control media-search-input"
+                  placeholder="Search Pixabay for media..."
+                />
+                <button type="button" id="mediaSearchBtn" class="btn-secondary">
+                  Search
+                </button>
+              </div>
+
+              <div id="mediaResults" class="media-results hidden"></div>
+              <div id="mediaPreview" class="media-preview hidden"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="postBody">Content *</label>
+              <textarea
+                id="postBody"
+                class="form-control textarea"
+                required
+                placeholder="Write your post content here..."
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-cancel" id="cancelPostBtn">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary" id="savePostBtn">
+            Save Post
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Global state
+      let currentUser = null;
+      let currentPosts = [];
+      let currentPage = 1;
+      let totalPages = 1;
+      let editingPostId = null;
+      let selectedMedia = null;
+
+      // API base URL
+      const API_BASE = window.location.origin + "/blogportal/api.php";
+
+      // Authentication
+      function getToken() {
+        return localStorage.getItem("blog_token");
+      }
+
+      function setToken(token) {
+        localStorage.setItem("blog_token", token);
+      }
+
+      function removeToken() {
+        localStorage.removeItem("blog_token");
+      }
+
+      function getAuthHeaders() {
+        const token = getToken();
+        return token ? { Authorization: `Bearer ${token}` } : {};
+      }
+
+      // API calls
+      async function apiCall(endpoint, options = {}) {
+        const response = await fetch(`${API_BASE}/${endpoint}`, {
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+            ...options.headers,
+          },
+          ...options,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Request failed");
+        }
+
+        return data;
+      }
+
+      // Login
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          const errorDiv = document.getElementById("loginError");
+
+          try {
+            const result = await apiCall("?path=auth/login", {
+  method: "POST",
+  body: JSON.stringify({ email, password }),
+});
+ 
+
+            setToken(result.token);
+            currentUser = result.user;
+            showDashboard();
+          } catch (error) {
+            errorDiv.textContent = error.message;
+            errorDiv.classList.remove("hidden");
+          }
+        });
+
+      // Logout
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        removeToken();
+        currentUser = null;
+        showLogin();
+      });
+
+      // Show/hide views
+      function showLogin() {
+        document.getElementById("loginContainer").classList.remove("hidden");
+        document.getElementById("dashboardContainer").classList.add("hidden");
+        document.getElementById("loginError").classList.add("hidden");
+        document.getElementById("loginForm").reset();
+      }
+
+      function showDashboard() {
+        document.getElementById("loginContainer").classList.add("hidden");
+        document
+          .getElementById("dashboardContainer")
+          .classList.remove("hidden");
+        document.getElementById("userEmail").textContent = currentUser.email;
+        document.getElementById("userRole").textContent =
+          currentUser.role.toUpperCase();
+        loadPosts();
+      }
+
+      // Load posts
+      async function loadPosts(page = 1, search = "", status = "active") {
+        const loadingDiv = document.getElementById("postsLoading");
+        const errorDiv = document.getElementById("postsError");
+        const tableBody = document.getElementById("postsTableBody");
+
+        try {
+          loadingDiv.classList.remove("hidden");
+          errorDiv.classList.add("hidden");
+
+          const params = new URLSearchParams({
+            page: page.toString(),
+            search,
+            status,
+          });
+
+          const result = await apiCall(`posts?${params}`);
+          currentPosts = result.posts;
+          currentPage = result.current_page;
+          totalPages = result.pages;
+
+          renderPosts();
+          renderPagination();
+        } catch (error) {
+          errorDiv.textContent = error.message;
+          errorDiv.classList.remove("hidden");
+        } finally {
+          loadingDiv.classList.add("hidden");
+        }
+      }
+
+      function renderPosts() {
+        const tableBody = document.getElementById("postsTableBody");
+
+        if (currentPosts.length === 0) {
+          tableBody.innerHTML =
+            '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #666;">No posts found</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = currentPosts
+          .map(
+            (post) => `
+                <tr>
+                    <td>
+                        <a href="post.php?slug=${
+                          post.slug
+                        }" target="_blank" class="post-title">
+                            ${escapeHtml(post.title)}
+                        </a>
+                    </td>
+                    <td>${escapeHtml(post.author_email)}</td>
+                    <td>${formatDate(post.created_at)}</td>
+                    <td>
+                        <span class="status-badge status-${post.status}">
+                            ${post.status.toUpperCase()}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-sm btn-view" onclick="viewPost('${
+                              post.slug
+                            }')">View</button>
+                            ${
+                              canEditPost(post)
+                                ? `
+                                <button class="btn-sm btn-edit" onclick="editPost(${post.id})">Edit</button>
+                                <button class="btn-sm btn-delete" onclick="deletePost(${post.id})">Delete</button>
+                            `
+                                : ""
+                            }
+                        </div>
+                    </td>
+                </tr>
+            `
+          )
+          .join("");
+      }
+
+      function renderPagination() {
+        const pagination = document.getElementById("pagination");
+
+        if (totalPages <= 1) {
+          pagination.innerHTML = "";
+          return;
+        }
+
+        let html = "";
+
+        // Previous button
+        html += `<button ${
+          currentPage === 1 ? "disabled" : ""
+        } onclick="changePage(${currentPage - 1})">Previous</button>`;
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+          if (
+            i === currentPage ||
+            i === 1 ||
+            i === totalPages ||
+            (i >= currentPage - 1 && i <= currentPage + 1)
+          ) {
+            html += `<button class="${
+              i === currentPage ? "active" : ""
+            }" onclick="changePage(${i})">${i}</button>`;
+          } else if (i === currentPage - 2 || i === currentPage + 2) {
+            html += "<button disabled>...</button>";
+          }
+        }
+
+        // Next button
+        html += `<button ${
+          currentPage === totalPages ? "disabled" : ""
+        } onclick="changePage(${currentPage + 1})">Next</button>`;
+
+        pagination.innerHTML = html;
+      }
+
+      function changePage(page) {
+        if (page >= 1 && page <= totalPages && page !== currentPage) {
+          const search = document.getElementById("searchInput").value;
+          const status = document.getElementById("statusFilter").value;
+          loadPosts(page, search, status);
+        }
+      }
+
+      // Search functionality
+      document.getElementById("searchBtn").addEventListener("click", () => {
+        const search = document.getElementById("searchInput").value;
+        const status = document.getElementById("statusFilter").value;
+        loadPosts(1, search, status);
+      });
+
+      document
+        .getElementById("searchInput")
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            document.getElementById("searchBtn").click();
+          }
+        });
+
+      document.getElementById("statusFilter").addEventListener("change", () => {
+        document.getElementById("searchBtn").click();
+      });
+
+      // Post management
+      function canEditPost(post) {
+        return currentUser.role === "admin" || post.author_id == currentUser.id;
+      }
+
+      function viewPost(slug) {
+        window.open(`post.php?slug=${slug}`, "_blank");
+      }
+
+      async function editPost(id) {
+        try {
+          const post = await apiCall(`posts/${id}`);
+          editingPostId = id;
+
+          document.getElementById("postModalTitle").textContent = "Edit Post";
+          document.getElementById("postTitle").value = post.title;
+          document.getElementById("postBody").value = post.body;
+
+          if (post.cover_media_url) {
+            selectedMedia = {
+              webformatURL: post.cover_media_url,
+              tags: post.title,
+              user: "Current",
+              type: post.media_type,
+            };
+            showMediaPreview();
+          }
+
+          document.getElementById("postModal").style.display = "block";
+        } catch (error) {
+          alert("Failed to load post: " + error.message);
+        }
+      }
+
+      async function deletePost(id) {
+        if (!confirm("Are you sure you want to delete this post?")) {
+          return;
+        }
+
+        try {
+          await apiCall(`posts/${id}`, { method: "DELETE" });
+          loadPosts(
+            currentPage,
+            document.getElementById("searchInput").value,
+            document.getElementById("statusFilter").value
+          );
+        } catch (error) {
+          alert("Failed to delete post: " + error.message);
+        }
+      }
+
+      // Modal management
+      document.getElementById("createPostBtn").addEventListener("click", () => {
+        editingPostId = null;
+        selectedMedia = null;
+        document.getElementById("postModalTitle").textContent =
+          "Create New Post";
+        document.getElementById("postForm").reset();
+        document.getElementById("mediaPreview").classList.add("hidden");
+        document.getElementById("mediaResults").classList.add("hidden");
+        document.getElementById("postError").classList.add("hidden");
+        document.getElementById("postSuccess").classList.add("hidden");
+        document.getElementById("postModal").style.display = "block";
+      });
+
+      document
+        .getElementById("postModalClose")
+        .addEventListener("click", () => {
+          document.getElementById("postModal").style.display = "none";
+        });
+
+      document.getElementById("cancelPostBtn").addEventListener("click", () => {
+        document.getElementById("postModal").style.display = "none";
+      });
+
+      // Close modal when clicking outside
+      window.addEventListener("click", (e) => {
+        if (e.target === document.getElementById("postModal")) {
+          document.getElementById("postModal").style.display = "none";
+        }
+      });
+
+      // Media search functionality
+      document
+        .getElementById("mediaSearchBtn")
+        .addEventListener("click", async () => {
+          const query = document
+            .getElementById("mediaSearchInput")
+            .value.trim();
+          if (!query) return;
+
+          const mediaType = document.querySelector(
+            'input[name="mediaType"]:checked'
+          ).value;
+          const resultsDiv = document.getElementById("mediaResults");
+
+          try {
+            resultsDiv.innerHTML =
+              '<div style="text-align: center; padding: 20px;">Searching...</div>';
+            resultsDiv.classList.remove("hidden");
+
+            const result = await apiCall(
+              `pixabay/search?q=${encodeURIComponent(query)}&type=${mediaType}`
+            );
+
+            if (result.hits && result.hits.length > 0) {
+              renderMediaResults(result.hits, mediaType);
+            } else {
+              resultsDiv.innerHTML =
+                '<div style="text-align: center; padding: 20px; color: #666;">No results found</div>';
+            }
+          } catch (error) {
+            resultsDiv.innerHTML = `<div style="text-align: center; padding: 20px; color: #c33;">Error: ${error.message}</div>`;
+          }
+        });
+
+      function renderMediaResults(hits, mediaType) {
+        const resultsDiv = document.getElementById("mediaResults");
+
+        resultsDiv.innerHTML = hits
+          .map(
+            (item, index) => `
+                <div class="media-item" onclick="selectMedia(${index}, '${mediaType}')">
+                    ${
+                      mediaType === "video"
+                        ? `<img src="${item.videos.tiny.url}" alt="${escapeHtml(
+                            item.tags
+                          )}">`
+                        : `<img src="${item.webformatURL}" alt="${escapeHtml(
+                            item.tags
+                          )}">`
+                    }
+                </div>
+            `
+          )
+          .join("");
+
+        // Store hits for selection
+        window.currentMediaHits = hits;
+      }
+
+      function selectMedia(index, mediaType) {
+        // Remove previous selection
+        document.querySelectorAll(".media-item").forEach((item) => {
+          item.classList.remove("selected");
+        });
+
+        // Add selection to clicked item
+        event.target.closest(".media-item").classList.add("selected");
+
+        const item = window.currentMediaHits[index];
+        selectedMedia = {
+          ...item,
+          type: mediaType,
+        };
+
+        showMediaPreview();
+      }
+
+      function showMediaPreview() {
+        const previewDiv = document.getElementById("mediaPreview");
+
+        if (!selectedMedia) {
+          previewDiv.classList.add("hidden");
+          return;
+        }
+
+        const attribution = `Image by ${selectedMedia.user} from Pixabay`;
+
+        previewDiv.innerHTML = `
+                <h5>Selected Media:</h5>
+                ${
+                  selectedMedia.type === "video"
+                    ? `<video controls style="max-width: 200px;"><source src="${selectedMedia.videos.small.url}" type="video/mp4"></video>`
+                    : `<img src="${selectedMedia.webformatURL}" style="max-width: 200px;">`
+                }
+                <p style="font-size: 0.8rem; color: #666; margin-top: 8px;">${attribution}</p>
+                <button type="button" onclick="clearMediaSelection()" style="margin-top: 10px; background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Remove</button>
+            `;
+        previewDiv.classList.remove("hidden");
+      }
+
+      function clearMediaSelection() {
+        selectedMedia = null;
+        document.getElementById("mediaPreview").classList.add("hidden");
+        document.querySelectorAll(".media-item").forEach((item) => {
+          item.classList.remove("selected");
+        });
+      }
+
+      // Save post
+      document
+        .getElementById("savePostBtn")
+        .addEventListener("click", async () => {
+          const title = document.getElementById("postTitle").value.trim();
+          const body = document.getElementById("postBody").value.trim();
+          const errorDiv = document.getElementById("postError");
+          const successDiv = document.getElementById("postSuccess");
+
+          if (!title || !body) {
+            errorDiv.textContent = "Title and content are required";
+            errorDiv.classList.remove("hidden");
+            successDiv.classList.add("hidden");
+            return;
+          }
+
+          try {
+            const postData = {
+              title,
+              body,
+            };
+
+            if (selectedMedia) {
+              const mediaUrl =
+                selectedMedia.type === "video"
+                  ? selectedMedia.videos.small.url
+                  : selectedMedia.webformatURL;
+
+              postData.cover_media_url = mediaUrl;
+              postData.media_type =
+                selectedMedia.type === "video" ? "video" : "image";
+              postData.media_attribution = `${
+                selectedMedia.type === "video" ? "Video" : "Image"
+              } by ${selectedMedia.user} from Pixabay`;
+            }
+
+            if (editingPostId) {
+              await apiCall(`posts/${editingPostId}`, {
+                method: "PUT",
+                body: JSON.stringify(postData),
+              });
+              successDiv.textContent = "Post updated successfully!";
+            } else {
+              await apiCall("posts", {
+                method: "POST",
+                body: JSON.stringify(postData),
+              });
+              successDiv.textContent = "Post created successfully!";
+            }
+
+            successDiv.classList.remove("hidden");
+            errorDiv.classList.add("hidden");
+
+            // Reload posts and close modal after a short delay
+            setTimeout(() => {
+              document.getElementById("postModal").style.display = "none";
+              loadPosts(
+                currentPage,
+                document.getElementById("searchInput").value,
+                document.getElementById("statusFilter").value
+              );
+            }, 1500);
+          } catch (error) {
+            errorDiv.textContent = error.message;
+            errorDiv.classList.remove("hidden");
+            successDiv.classList.add("hidden");
+          }
+        });
+
+      // Utility functions
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+      }
+
+      // Initialize app
+      function init() {
+        const token = getToken();
+        if (token) {
+          // Try to verify token is still valid by making a test API call
+          apiCall("posts?page=1")
+            .then(() => {
+              // Token is valid, decode user info from token (simple version)
+              const payload = JSON.parse(atob(token.split(".")[1]));
+              currentUser = {
+                id: payload.sub,
+                role: payload.role,
+                email: "Current User", // We don't store email in JWT for this demo
+              };
+
+              // Try to get user email from a test call
+              return apiCall("posts?page=1&per_page=1");
+            })
+            .then((result) => {
+              // If we have posts, we can get the current user's email from their posts
+              const userPost = result.posts.find(
+                (post) => post.author_id == currentUser.id
+              );
+              if (userPost) {
+                currentUser.email = userPost.author_email;
+              }
+              showDashboard();
+            })
+            .catch(() => {
+              // Token invalid or expired
+              removeToken();
+              showLogin();
+            });
+        } else {
+          showLogin();
+        }
+      }
+
+      // Start the app
+      init();
+    </script>
+  </body>
+</html>
