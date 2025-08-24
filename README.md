@@ -90,12 +90,12 @@ The system comes with pre-configured test users:
 
 **Admin User:**
 - Email: `admin@blog.com`
-- Password: `admin123`
+- Password: `password`
 - Permissions: Can create, edit, delete any post
 
 **Regular Users:**
-- Email: `john@example.com` / Password: `user123`
-- Email: `jane@example.com` / Password: `user123`
+- Email: `john@example.com` / Password: `password`
+- Email: `jane@example.com` / Password: `password`
 - Permissions: Can create posts and edit/delete their own posts
 
 ### Dashboard Features
